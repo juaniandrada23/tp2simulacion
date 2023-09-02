@@ -1,0 +1,78 @@
+body {
+    background-color: rgba(43, 51, 203, 0.464);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.boton {
+    margin-left: 20px;
+}
+
+.botonera{
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.nombrenumero{
+    text-align: center;
+}
+
+.botonesprimero{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    background-color: white;
+    margin-right: 14%;
+    margin-left: 14%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 25px;
+    border-radius: 50px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.histograma{
+    background-color: white;
+    border-radius: 25px;
+}
+
+.grafico{
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tabladenumeros{
+    background-color: white;
+    padding: 15px;
+    border-radius: 20px;
+}
+
+.fila1{
+    display: flex;
+    justify-content: space-around;
+}
+
+.filatexto{
+    display: flex;
+    flex-direction: row;
+}
+
+.fila2{
+    display: flex;
+    align-items: center;
+    background-color: white;
+    justify-content: center;
+    margin-left: 10%;
+    margin-right: 10%;
+    border-radius: 20px;
+}
+
+.table-header {
+    background-color: rgba(30, 46, 68, 0.804);
+  }
+  
+tr:nth-child(odd) {
+    background-color: rgba(88, 121, 156, 0.618);
+  }
+  
