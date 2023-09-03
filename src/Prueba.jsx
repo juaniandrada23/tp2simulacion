@@ -5,7 +5,7 @@ import { Grid, Typography, Table, TableHead, TableBody, TableRow, TableCell, But
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-const ITEMS_PER_PAGE = 100; // Número de elementos por página
+const ITEMS_PER_PAGE = 100; // Elementos por página
 
 const Prueba = () => {
   //ASIGNAR VARIABLES
@@ -20,6 +20,7 @@ const Prueba = () => {
   const [media,setMedia] = useState(1);
   const [desvEstandar,setDesviacionEstandar] = useState(1);
   const [mediaNormal,setMediaNormal] = useState(1);
+  const [lambda, setLambda] = useState(1);
 
   const [currentPage, setCurrentPage] = useState(1);
   const chartRef = useRef();
@@ -97,7 +98,7 @@ const Prueba = () => {
     const intervaloAncho = (maxNumero - minNumero) / intervalos;
 
     // Generar los datos agrupados utilizando los nuevos intervalos
-    const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion);
+    const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, media, desvEstandar);
 
     // Actualizar datos del gráfico
     const labels = datosAgrupados.map(({ desde, hasta }) => {
@@ -116,24 +117,39 @@ const Prueba = () => {
     setNumerosGenerados(nuevosNumeros.map((numero, index) => ({ id: index + 1, numero })));
   };
 
-  const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion) => {
+  const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, media, desvEstandar) => {
     let minValor = minNumero;
+    let sumaProbabilidades = 0;
     const datosAgrupados = new Array(intervalos).fill(0).map((_, index) => {
       const desde = minValor;
       const hasta = minValor + intervaloAncho;
       const cantidad = numeros.filter((numero) => numero >= desde && numero < hasta).length;
       let frecEsperada = 0;
-  
+      let probabilidadAcumulada = 0;
+      let marcaClase = 0;
+
       if (distribucion === 'Uniforme') {
         frecEsperada = numeros.length / intervalos;
-      } else if (distribucion === 'Normal') {
-        frecEsperada = 0;
+      } else if (distribucion === 'Exponencial') { //Ver bien porque la frecEsperada nos esta dando mucho mas chica que la frecObservada
+        if (index === 0) {
+          probabilidadAcumulada = 1 - Math.exp(-lambda * hasta);
+        } else {
+          probabilidadAcumulada = (1 - Math.exp(-lambda * hasta)) - (1 - Math.exp(-lambda * desde));
+        }
+        frecEsperada = probabilidadAcumulada * numeros.length;      
+      } else if (distribucion === 'Normal') { //Ver bien para que el usuario cargue la media o se calcule automaticamente DA MAL!!!!
+        marcaClase = (desde+hasta)/2;
+        probabilidadAcumulada = Math.exp(-0.5 * Math.pow((marcaClase - media) / desvEstandar, 2)) / (desvEstandar * Math.sqrt(2 * Math.PI));
+        frecEsperada = probabilidadAcumulada * numeros.length;
       }
   
-      minValor += intervaloAncho; // Actualiza el valor mínimo para el próximo intervalo
-      return { desde, hasta, cantidad, frecEsperada };
+      sumaProbabilidades += probabilidadAcumulada; // Sumamos la probAcumulada para ver SI NOS DA 1
+      minValor += intervaloAncho;
+      return { desde, hasta, marcaClase, cantidad, frecEsperada, probabilidadAcumulada};
     });
+
     console.log(datosAgrupados);
+    console.log('Suma de las probabilidades acumuladas:', sumaProbabilidades);
   
     setDatosAgrupados(datosAgrupados);
     return datosAgrupados;
@@ -142,7 +158,6 @@ const Prueba = () => {
   const generarNumerosDistribucionNormal = (cantidad) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
-      // Generar números aleatorios con distribución normal utilizando la función modificarGenerarNumeroNormal()
       const numero = modificarGenerarNumeroNormal(desvEstandar,mediaNormal);
       nuevosNumeros.push(numero);
     }
@@ -172,7 +187,6 @@ const Prueba = () => {
   const generarNumerosDistribucionUniforme = (cantidad,a,b) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
-      // Generar números aleatorios con distribución uniforme (0 a 1)
       const u = a + Math.random() * (b-a);
       nuevosNumeros.push(u);
     }
@@ -199,6 +213,7 @@ const Prueba = () => {
       return (
         <div className='filatexto'>
           <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Media" variant="filled" type="number" value={media} onChange={(e) => setMedia(parseFloat(e.target.value))}/>
+          <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Lambda" variant="filled" type="number" value={lambda} onChange={(e) => setLambda(parseFloat(e.target.value))}/>
         </div>
       );
     }
@@ -275,18 +290,22 @@ const Prueba = () => {
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Intervalos</TableCell>
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Desde</TableCell>
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Hasta</TableCell>
+                <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Marca</TableCell>
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Frecuencia Observada</TableCell>
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Frecuencia Esperada</TableCell>
+                <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Probabilidad acumulada</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {datosAgrupados.map((dato, index) => (
                 <TableRow key={index}>
                   <TableCell align="center">{index + 1}</TableCell>                  
-                  <TableCell align="center">{dato.desde.toFixed(2)}</TableCell>
-                  <TableCell align="center">{dato.hasta.toFixed(2)}</TableCell>
+                  <TableCell align="center">{dato.desde.toFixed(3)}</TableCell>
+                  <TableCell align="center">{dato.hasta.toFixed(3)}</TableCell>
+                  <TableCell align="center">{dato.marcaClase.toFixed(3)}</TableCell>
                   <TableCell align="center">{dato.cantidad}</TableCell>
-                  <TableCell align="center">{dato.frecEsperada}</TableCell>
+                  <TableCell align="center">{dato.frecEsperada.toFixed(3)}</TableCell>
+                  <TableCell align="center">{dato.probabilidadAcumulada.toFixed(3)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
