@@ -5,7 +5,7 @@ import { Grid, Typography, Table, TableHead, TableBody, TableRow, TableCell, But
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-const ITEMS_PER_PAGE = 100; // Elementos por página
+const ITEMS_PER_PAGE = 100;
 
 const Prueba = () => {
   //ASIGNAR VARIABLES
@@ -15,10 +15,13 @@ const Prueba = () => {
   const [numerosGenerados, setNumerosGenerados] = useState([]);
   const [datosAgrupados, setDatosAgrupados] = useState([]);
 
+  //PARA UNIFORME
   const [a,setA] = useState(8);
   const [b,setB] = useState(14);
+  //PARA NORMAL (Preg a profe calculo de varianza y media cuando queremos sacar las frecuencias)
   const [desvEstandar,setDesviacionEstandar] = useState(1);
   const [mediaNormal,setMediaNormal] = useState(1);
+  //PARA EXPONENCIAL (Preg a profe si le pedimos al usuario cargar media)
   const [lambda, setLambda] = useState(1);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,6 +46,22 @@ const Prueba = () => {
               data: [],
             },
           ],
+        },
+        options: {
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Intervalos',
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Cantidad de Números',
+              },
+            },
+          },
         },
       });
     }
@@ -124,7 +143,7 @@ const Prueba = () => {
     const datosAgrupados = new Array(intervalos).fill(0).map((_, index) => {
       const desde = minValor;
       const hasta = minValor + intervaloAncho;
-      const cantidad = numeros.filter((numero) => numero >= desde && numero < hasta).length;
+      const cantidad = numeros.filter((numero) => numero >= desde && numero <= hasta).length;
       //let mediaTabla = 0;
       //let desvEstandarTabla = 0;
       let frecEsperada = 0;
