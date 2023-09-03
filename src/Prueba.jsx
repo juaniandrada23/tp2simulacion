@@ -17,7 +17,6 @@ const Prueba = () => {
 
   const [a,setA] = useState(8);
   const [b,setB] = useState(14);
-  const [media,setMedia] = useState(1);
   const [desvEstandar,setDesviacionEstandar] = useState(1);
   const [mediaNormal,setMediaNormal] = useState(1);
   const [lambda, setLambda] = useState(1);
@@ -71,7 +70,7 @@ const Prueba = () => {
         nuevosNumeros = generarNumerosDistribucionNormal(cantidad);
         break;
       case 'Exponencial':
-        nuevosNumeros = generarNumerosDistribucionExponencial(cantidad,media);
+        nuevosNumeros = generarNumerosDistribucionExponencial(cantidad,lambda);
         break;
       case 'Uniforme':
         nuevosNumeros = generarNumerosDistribucionUniforme(cantidad,a,b);
@@ -98,7 +97,7 @@ const Prueba = () => {
     const intervaloAncho = (maxNumero - minNumero) / intervalos;
 
     // Generar los datos agrupados utilizando los nuevos intervalos
-    const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, media, desvEstandar);
+    const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b);
 
     // Actualizar datos del gráfico
     const labels = datosAgrupados.map(({ desde, hasta }) => {
@@ -117,38 +116,47 @@ const Prueba = () => {
     setNumerosGenerados(nuevosNumeros.map((numero, index) => ({ id: index + 1, numero })));
   };
 
-  const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, media, desvEstandar) => {
+  const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b) => {
     let minValor = minNumero;
     let sumaProbabilidades = 0;
+    let sumaNumeros = numeros.reduce((acc, numero) => acc + numero, 0);
+  
     const datosAgrupados = new Array(intervalos).fill(0).map((_, index) => {
       const desde = minValor;
       const hasta = minValor + intervaloAncho;
       const cantidad = numeros.filter((numero) => numero >= desde && numero < hasta).length;
+      //let mediaTabla = 0;
+      //let desvEstandarTabla = 0;
       let frecEsperada = 0;
       let probabilidadAcumulada = 0;
       let marcaClase = 0;
-
+  
       if (distribucion === 'Uniforme') {
         frecEsperada = numeros.length / intervalos;
-      } else if (distribucion === 'Exponencial') { //Ver bien porque la frecEsperada nos esta dando mucho mas chica que la frecObservada
+        probabilidadAcumulada = (hasta-desde)/(b-a);
+      } else if (distribucion === 'Exponencial') {
         if (index === 0) {
           probabilidadAcumulada = 1 - Math.exp(-lambda * hasta);
         } else {
           probabilidadAcumulada = (1 - Math.exp(-lambda * hasta)) - (1 - Math.exp(-lambda * desde));
         }
-        frecEsperada = probabilidadAcumulada * numeros.length;      
-      } else if (distribucion === 'Normal') { //Ver bien para que el usuario cargue la media o se calcule automaticamente DA MAL!!!!
-        marcaClase = (desde+hasta)/2;
-        probabilidadAcumulada = Math.exp(-0.5 * Math.pow((marcaClase - media) / desvEstandar, 2)) / (desvEstandar * Math.sqrt(2 * Math.PI));
         frecEsperada = probabilidadAcumulada * numeros.length;
+      } else if (distribucion === 'Normal') {
+        //VER BIEN ESTO CON LOS NUMEROS GENERADOS
+        marcaClase = (desde + hasta) / 2;
+        //mediaTabla = sumaNumeros / numeros.length;
+        //desvEstandarTabla = Math.sqrt(numeros.reduce((acc, numero) => acc + Math.pow(numero - mediaTabla, 2), 0) / (numeros.length - 1));
+        //probabilidadAcumulada = Math.exp(-0.5 * Math.pow((marcaClase - mediaTabla) / desvEstandarTabla, 2)) / (desvEstandarTabla * Math.sqrt(2 * Math.PI));
+        //frecEsperada = probabilidadAcumulada * numeros.length;
       }
-  
-      sumaProbabilidades += probabilidadAcumulada; // Sumamos la probAcumulada para ver SI NOS DA 1
+    
+      sumaProbabilidades += probabilidadAcumulada;
       minValor += intervaloAncho;
       return { desde, hasta, marcaClase, cantidad, frecEsperada, probabilidadAcumulada};
     });
-
+  
     console.log(datosAgrupados);
+    console.log('Suma de números:', sumaNumeros);
     console.log('Suma de las probabilidades acumuladas:', sumaProbabilidades);
   
     setDatosAgrupados(datosAgrupados);
@@ -165,7 +173,7 @@ const Prueba = () => {
   };
 
   const modificarGenerarNumeroNormal = (desvEstandar,mediaNormal) => {
-    // Generar un número normal utilizando el método de Box-Muller
+    //Box-Muller
     let u1 = Math.random();
     let u2 = Math.random();
     let z0 = (Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)) * desvEstandar + mediaNormal;
@@ -173,12 +181,12 @@ const Prueba = () => {
   };
 
   //Ver bien como es la formula de la media y lambda
-  const generarNumerosDistribucionExponencial = (cantidad, media) => {
+  const generarNumerosDistribucionExponencial = (cantidad, lambda) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
       // VER COMO CAMBIAR DESPUES EL VALOR DE LAMBDA
       const u = Math.random();
-      const x = -media * Math.log(1 - u);
+      const x = (-1/lambda) * Math.log(1 - u);
       nuevosNumeros.push(x);
     }
     return nuevosNumeros;
@@ -212,7 +220,6 @@ const Prueba = () => {
     } else if (distribucion === 'Exponencial') {
       return (
         <div className='filatexto'>
-          <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Media" variant="filled" type="number" value={media} onChange={(e) => setMedia(parseFloat(e.target.value))}/>
           <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Lambda" variant="filled" type="number" value={lambda} onChange={(e) => setLambda(parseFloat(e.target.value))}/>
         </div>
       );
