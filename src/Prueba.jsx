@@ -41,6 +41,8 @@ const Prueba = () => {
               backgroundColor: 'blue',
               borderColor: 'rgba(75,192,192,1)',
               borderWidth: 1,
+              barPercentage: 1,
+              categoryPercentage: 1,
               hoverBackgroundColor: 'rgba(75,192,192,0.6)',
               hoverBorderColor: 'rgba(75,192,192,1)',
               data: [],
@@ -122,6 +124,7 @@ const Prueba = () => {
     const labels = datosAgrupados.map(({ desde, hasta }) => {
       return `${desde.toFixed(2)} a ${hasta.toFixed(2)}`;
     });
+
     chartInstanceRef.current.data.labels = labels;
     chartInstanceRef.current.data.datasets[0].data = datosAgrupados.map((item) => item.cantidad);
     chartInstanceRef.current.options.scales.x = {
@@ -286,7 +289,7 @@ const Prueba = () => {
                 {paginatedNumeros.map(({ id, numero }) => (
                   <TableRow key={id}>
                     <TableCell align='center'>{id}</TableCell>
-                    <TableCell align='center'>{numero.toFixed(4)}</TableCell>
+                    <TableCell align='center'>{numero.toFixed(4)}</TableCell>                 
                   </TableRow>
                 ))}
               </TableBody>
