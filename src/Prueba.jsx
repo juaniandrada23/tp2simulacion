@@ -9,9 +9,9 @@ const ITEMS_PER_PAGE = 100;
 
 const Prueba = () => {
   //ASIGNAR VARIABLES
-  const [cantidad, setCantidad] = useState(10);
+  const [cantidad, setCantidad] = useState(100);
   const [intervalos, setIntervalos] = useState(10);
-  const [distribucion, setDistribucion] = useState('Normal');
+  const [distribucion, setDistribucion] = useState('Uniforme');
   const [numerosGenerados, setNumerosGenerados] = useState([]);
   const [datosAgrupados, setDatosAgrupados] = useState([]);
 
@@ -24,6 +24,7 @@ const Prueba = () => {
   //PARA EXPONENCIAL (Preg a profe si le pedimos al usuario cargar media)
   const [lambda, setLambda] = useState(1);
 
+  const [errorMensaje, setErrorMensaje] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const chartRef = useRef();
   const chartInstanceRef = useRef(null);
@@ -51,12 +52,6 @@ const Prueba = () => {
         },
         options: {
           scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Intervalos',
-              },
-            },
             y: {
               title: {
                 display: true,
@@ -85,6 +80,13 @@ const Prueba = () => {
   const generarNumerosRandom = () => {
     let nuevosNumeros = [];
 
+    if (b <= a) {
+      setErrorMensaje('Error: Ingrese un número "B" mayor que "A"');
+      return;
+    }
+
+    setErrorMensaje('');
+
     // Generar números según la distribución seleccionada
     switch (distribucion) {
       case 'Normal':
@@ -112,31 +114,29 @@ const Prueba = () => {
         maxNumero = numero;
       }
     }
-    //----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------
+  const intervaloAncho = (maxNumero - minNumero) / intervalos;
 
-    // Calcular el intervaloANcho basado en el valor mínimo, máximo y la cantidad de intervalos
-    const intervaloAncho = (maxNumero - minNumero) / intervalos;
+  const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b);
 
-    // Generar los datos agrupados utilizando los nuevos intervalos
-    const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b);
+  const labels = datosAgrupados.map(({ desde, hasta }) => {
+    return `${desde.toFixed(2)} a ${hasta.toFixed(2)}`;
+  });
 
-    // Actualizar datos del gráfico
-    const labels = datosAgrupados.map(({ desde, hasta }) => {
-      return `${desde.toFixed(2)} a ${hasta.toFixed(2)}`;
-    });
+  console.log(labels);
 
-    chartInstanceRef.current.data.labels = labels;
-    chartInstanceRef.current.data.datasets[0].data = datosAgrupados.map((item) => item.cantidad);
-    chartInstanceRef.current.options.scales.x = {
-      type: 'category',
-      labels: labels,
-      display: true,
-    };
-    chartInstanceRef.current.update();
+  chartInstanceRef.current.data.labels = labels;
+  chartInstanceRef.current.data.datasets[0].data = datosAgrupados.map((item) => item.cantidad);
+  chartInstanceRef.current.options.scales.x = {
+    type: 'category',
+    labels: labels,
+    display: true,
+  };
+  chartInstanceRef.current.update();
 
-    // Actualizar números generados para mostrar en la tabla
     setNumerosGenerados(nuevosNumeros.map((numero, index) => ({ id: index + 1, numero })));
   };
+  //--------------------------------------------------------------------------------------------------------
 
   const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b) => {
     let minValor = minNumero;
@@ -172,8 +172,8 @@ const Prueba = () => {
         //frecEsperada = probabilidadAcumulada * numeros.length;
       }
     
-      sumaProbabilidades += probabilidadAcumulada;
-      minValor += intervaloAncho;
+      sumaProbabilidades += probabilidadAcumulada;//Ir sumando cada probabilidad
+      minValor += intervaloAncho; //Ir sumando cada minimo valor del intervalo
       return { desde, hasta, marcaClase, cantidad, frecEsperada, probabilidadAcumulada};
     });
   
@@ -254,6 +254,14 @@ const Prueba = () => {
     <div>
       <h2 style={{textAlign:'center'}}>TP2 SIM</h2>
 
+      <div className='error'>
+        {errorMensaje && (
+          <div style={{ color: 'red', textAlign: 'center', marginBottom:'10px'}}>
+            {errorMensaje}
+          </div>
+        )}
+      </div>
+
       <div className='botonesprimero'>
           <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Numeros" variant="filled" type="number" value={cantidad} onChange={(e) => setCantidad(parseInt(e.target.value))}/>
           <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Intervalos" variant="filled" type="number" value={intervalos} onChange={(e) => setIntervalos(parseInt(e.target.value))}/>
@@ -270,7 +278,7 @@ const Prueba = () => {
 
         <Grid className='histograma' item xs={5}>
           <div className='grafico'>
-            <canvas ref={chartRef} width="400" height="300" />
+            <canvas ref={chartRef} width="500" height="400" />
           </div>
         </Grid>
 
@@ -329,8 +337,8 @@ const Prueba = () => {
               {datosAgrupados.map((dato, index) => (
                 <TableRow key={index}>
                   <TableCell align="center">{index + 1}</TableCell>                  
-                  <TableCell align="center">{dato.desde.toFixed(3)}</TableCell>
-                  <TableCell align="center">{dato.hasta.toFixed(3)}</TableCell>
+                  <TableCell align="center">{dato.desde.toFixed(2)}</TableCell>
+                  <TableCell align="center">{dato.hasta.toFixed(2)}</TableCell>
                   <TableCell align="center">{dato.marcaClase.toFixed(3)}</TableCell>
                   <TableCell align="center">{dato.cantidad}</TableCell>
                   <TableCell align="center">{dato.frecEsperada.toFixed(3)}</TableCell>
