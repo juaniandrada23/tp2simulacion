@@ -117,7 +117,7 @@ const Prueba = () => {
   //--------------------------------------------------------------------------------------------------------
   const intervaloAncho = (maxNumero - minNumero) / intervalos;
 
-  const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b);
+  const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b, mediaNormal, desvEstandar);
 
   const labels = datosAgrupados.map(({ desde, hasta }) => {
     return `${desde.toFixed(2)} a ${hasta.toFixed(2)}`;
@@ -138,14 +138,14 @@ const Prueba = () => {
   };
   //--------------------------------------------------------------------------------------------------------
 
-  const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b) => {
+  const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b, mediaNormal, desvEstandar) => {
     let minValor = minNumero;
     let sumaProbabilidades = 0;
     let sumaNumeros = numeros.reduce((acc, numero) => acc + numero, 0);
   
     const datosAgrupados = new Array(intervalos).fill(0).map((_, index) => {
       const desde = minValor;
-      const hasta = minValor + intervaloAncho;
+      const hasta = minValor + intervaloAncho ;
       const cantidad = numeros.filter((numero) => numero >= desde && numero <= hasta).length;
       //let mediaTabla = 0;
       //let desvEstandarTabla = 0;
@@ -154,6 +154,7 @@ const Prueba = () => {
       let marcaClase = 0;
   
       if (distribucion === 'Uniforme') {
+        marcaClase = (desde + hasta) / 2;
         frecEsperada = numeros.length / intervalos;
         probabilidadAcumulada = (hasta-desde)/(b-a);
       } else if (distribucion === 'Exponencial') {
@@ -163,23 +164,29 @@ const Prueba = () => {
           probabilidadAcumulada = (1 - Math.exp(-lambda * hasta)) - (1 - Math.exp(-lambda * desde));
         }
         frecEsperada = probabilidadAcumulada * numeros.length;
+        marcaClase = (desde + hasta) / 2;
       } else if (distribucion === 'Normal') {
         //VER BIEN ESTO CON LOS NUMEROS GENERADOS
-        marcaClase = (desde + hasta) / 2;
         //mediaTabla = sumaNumeros / numeros.length;
         //desvEstandarTabla = Math.sqrt(numeros.reduce((acc, numero) => acc + Math.pow(numero - mediaTabla, 2), 0) / (numeros.length - 1));
-        //probabilidadAcumulada = Math.exp(-0.5 * Math.pow((marcaClase - mediaTabla) / desvEstandarTabla, 2)) / (desvEstandarTabla * Math.sqrt(2 * Math.PI));
-        //frecEsperada = probabilidadAcumulada * numeros.length;
+        marcaClase = (desde + hasta) / 2;
+        probabilidadAcumulada = Math.exp(-0.5 * Math.pow((marcaClase - mediaNormal) / desvEstandar, 2)) / (desvEstandar * Math.sqrt(2 * Math.PI));
+        frecEsperada = probabilidadAcumulada * numeros.length;
       }
     
       sumaProbabilidades += probabilidadAcumulada;//Ir sumando cada probabilidad
       minValor += intervaloAncho; //Ir sumando cada minimo valor del intervalo
+
       return { desde, hasta, marcaClase, cantidad, frecEsperada, probabilidadAcumulada};
     });
   
     console.log(datosAgrupados);
     console.log('Suma de números:', sumaNumeros);
     console.log('Suma de las probabilidades acumuladas:', sumaProbabilidades);
+    console.log('--Cantidad de numeros generados--:', cantidad)
+    console.log("Media tabla:",mediaNormal);
+    console.log("Desviacion Estandar:",desvEstandar);
+    console.log("Numeros generados", numeros);
   
     setDatosAgrupados(datosAgrupados);
     return datosAgrupados;
@@ -339,10 +346,10 @@ const Prueba = () => {
                   <TableCell align="center">{index + 1}</TableCell>                  
                   <TableCell align="center">{dato.desde.toFixed(2)}</TableCell>
                   <TableCell align="center">{dato.hasta.toFixed(2)}</TableCell>
-                  <TableCell align="center">{dato.marcaClase.toFixed(3)}</TableCell>
+                  <TableCell align="center">{dato.marcaClase.toFixed(2)}</TableCell>
                   <TableCell align="center">{dato.cantidad}</TableCell>
-                  <TableCell align="center">{dato.frecEsperada.toFixed(3)}</TableCell>
-                  <TableCell align="center">{dato.probabilidadAcumulada.toFixed(3)}</TableCell>
+                  <TableCell align="center">{dato.frecEsperada.toFixed(2)}</TableCell>
+                  <TableCell align="center">{distribucion === 'Uniforme' ? dato.probabilidadAcumulada.toFixed(1) : dato.probabilidadAcumulada.toFixed(3)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
