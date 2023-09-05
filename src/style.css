@@ -90,3 +90,15 @@ tr:nth-child(odd) {
     border-radius: 25px;
     font-weight: 700;
 }
+
+.fila3{
+    text-align: center;
+    margin-top: 25px;
+    margin-left: 35%;
+    margin-right: 35%;
+    border-radius: 25px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
