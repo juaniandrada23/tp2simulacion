@@ -87,9 +87,13 @@ const Prueba = () => {
     if (b <= a) {
       setErrorMensaje('Error: Ingrese un número "B" mayor que "A"');
       return;
+    } else if (cantidad > 1000000) {
+      setErrorMensaje('Error: Ingrese un numero menor a un millon');
+      return;
+    } else if (cantidad < 0) {
+      setErrorMensaje('Error: Ingrese un numero positivo para las cantidades');
+      return;
     }
-
-    setErrorMensaje('');
 
     // Generar números según la distribución seleccionada
     switch (distribucion) {
@@ -130,8 +134,6 @@ const Prueba = () => {
   const labels = datosAgrupados.map(({ desde, hasta }) => {
     return `${desde.toFixed(2)} a ${hasta.toFixed(2)}`;
   });
-
-  console.log(labels);
 
   chartInstanceRef.current.data.labels = labels;
   chartInstanceRef.current.data.datasets[0].data = datosAgrupados.map((item) => item.cantidad);
