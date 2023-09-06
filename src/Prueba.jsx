@@ -1,3 +1,4 @@
+//IMPORTACION DE LIBRERIAS Y RUTAS
 import React, { useState, useRef, useEffect } from 'react';
 import { Chart } from 'chart.js/auto';
 import './style.css';
@@ -12,7 +13,9 @@ const Prueba = () => {
   const [cantidad, setCantidad] = useState(100);
   const [intervalos, setIntervalos] = useState(10);
   const [distribucion, setDistribucion] = useState('Uniforme');
+  //ASIGNACION DE NUMEROS AL ARRAY
   const [numerosGenerados, setNumerosGenerados] = useState([]);
+  //ASIGNACION DE DATOS PARA LA TABLA AL ARRAY
   const [datosAgrupados, setDatosAgrupados] = useState([]);
 
   //PARA UNIFORME
@@ -33,6 +36,7 @@ const Prueba = () => {
   const chartRef = useRef();
   const chartInstanceRef = useRef(null);
 
+  //GENERACION DEL GRAFICO USANDO CHARTJS QUE ES UNA LIBRERIA PARA GRAFICOS EN JAVASCRIPT
   useEffect(() => {
     if (!chartInstanceRef.current) {
       const ctx = chartRef.current.getContext('2d');
@@ -68,7 +72,7 @@ const Prueba = () => {
     }
   }, []);
 
-  //----------------------------PAGINADO--------------------------------------
+  //----------------------------PAGINADO PARA LOS NUMEROS--------------------------------------
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -79,11 +83,13 @@ const Prueba = () => {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-  //--------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------
 
+  //FUNCION PARA LA GENERACION DE LOS NUMEROS SEGUN SU DISTRIBUCION
   const generarNumerosRandom = () => {
     let nuevosNumeros = [];
 
+    //MANEJO DE ERRORES
     if (b <= a) {
       setErrorMensaje('Error: Ingrese un número "B" mayor que "A"');
       return;
@@ -95,7 +101,7 @@ const Prueba = () => {
       return;
     }
 
-    // Generar números según la distribución seleccionada
+    //MANEJO DE LAS FUNCIONES SEGUN SU DISTRIBUCION
     switch (distribucion) {
       case 'Normal':
         nuevosNumeros = generarNumerosDistribucionNormal(cantidad);
@@ -126,15 +132,19 @@ const Prueba = () => {
         maxNumero = numero;
       }
     }
-  //--------------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------
+  //CALCULAR ANCHO DEL INTERVALO
   const intervaloAncho = (maxNumero - minNumero) / intervalos;
 
+  //GUARDAR EN UNA CONSTANTE LOS DATOS
   const datosAgrupados = generarDatosAgrupados(nuevosNumeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b, mediaNormal, desvEstandar);
 
+  //MAPEO DE LOS DATOS PARA USAR EN EL GRAFICO
   const labels = datosAgrupados.map(({ desde, hasta }) => {
     return `${desde.toFixed(2)} a ${hasta.toFixed(2)}`;
   });
 
+  //EJE X PARA EL GRAFICO OPCIONES
   chartInstanceRef.current.data.labels = labels;
   chartInstanceRef.current.data.datasets[0].data = datosAgrupados.map((item) => item.cantidad);
   chartInstanceRef.current.options.scales.x = {
@@ -146,8 +156,8 @@ const Prueba = () => {
 
     setNumerosGenerados(nuevosNumeros.map((numero, index) => ({ id: index + 1, numero })));
   };
-  //--------------------------------------------------------------------------------------------------------
 
+  //FUNCION PARA CALCULOS SEGUN SU INTERVALO Y USARLOS EN LA TABLA || LO DEJAMOS HECHO PARA EL PROXIMO TP
   const generarDatosAgrupados = (numeros, minNumero, intervaloAncho, intervalos, distribucion, lambda, a, b, mediaNormal, desvEstandar) => {
     let minValor = minNumero;
     let sumaProbabilidades = 0;
@@ -203,6 +213,7 @@ const Prueba = () => {
     return datosAgrupados;
   };  
 
+  //ASIGNACION DE NUMEROS NORMALES A LA FUNCION || PODEMOS COMBINAR LA FUNCION EN UNA SOLA
   const generarNumerosDistribucionNormal = (cantidad) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
@@ -212,6 +223,7 @@ const Prueba = () => {
     return nuevosNumeros;
   };
 
+  //FUNCION PARA NUMEROS CON DISTRIBUCION NORMAL USANDO BOXMULLER
   const modificarGenerarNumeroNormal = (desvEstandar,mediaNormal) => {
     //Box-Muller
     let u1 = Math.random();
@@ -220,6 +232,7 @@ const Prueba = () => {
     return z0;
   };
 
+  //FUNCION PARA NUMEROS CON DISTRIBUCION EXPONENCIAL USANDO LAMBDA
   const generarNumerosDistribucionExponencial = (cantidad, lambda) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
@@ -230,6 +243,7 @@ const Prueba = () => {
     return nuevosNumeros;
   };
 
+  //FUNCION PARA NUMEROS CON DISTRIBUCION EXPONENCIAL USANDO MEDIA
   const generarNumerosDistribucionExponencialConMedia = (cantidad, mediaExponencial) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
@@ -240,6 +254,7 @@ const Prueba = () => {
     return nuevosNumeros;
   };
 
+  //FUNCION PARA NUMEROS CON DISTRIBUCION UNIFORME 
   const generarNumerosDistribucionUniforme = (cantidad,a,b) => {
     const nuevosNumeros = [];
     for (let i = 0; i < cantidad; i++) {
@@ -249,7 +264,7 @@ const Prueba = () => {
     return nuevosNumeros;
   };
 
-  //ACA HACEMOS LOS CAMPOS PARA CARGAR DATOS
+  //ACA HACEMOS LOS CAMPOS PARA CARGAR DATOS SEGUN SU DISTRIBUCION
   const renderCampos = () => {
     if (distribucion === 'Uniforme') {
       return (
