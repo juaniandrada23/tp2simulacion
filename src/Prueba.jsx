@@ -313,7 +313,12 @@ const Prueba = () => {
 
       <div className='botonesprimero'>
           <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Numeros" variant="filled" type="number" value={cantidad} onChange={(e) => setCantidad(parseInt(e.target.value))}/>
-          <TextField style={{marginLeft:'15px'}} id="filled-basic" label="Intervalos" variant="filled" type="number" value={intervalos} onChange={(e) => setIntervalos(parseInt(e.target.value))}/>
+          <Select style={{marginLeft:'15px'}} value={intervalos} onChange={(e) => setIntervalos(parseInt(e.target.value))}>
+            <MenuItem value="10">10</MenuItem >
+            <MenuItem value="15">15</MenuItem >
+            <MenuItem value="20">20</MenuItem >
+            <MenuItem value="25">25</MenuItem >
+          </Select>
           <Select style={{marginLeft:'15px'}} value={distribucion} onChange={(e) => setDistribucion(e.target.value)}>
             <MenuItem value="Normal">Normal</MenuItem >
             <MenuItem value="Exponencial">Exponencial</MenuItem >
@@ -378,8 +383,8 @@ const Prueba = () => {
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Hasta</TableCell>
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Marca</TableCell>
                 <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Frecuencia Observada</TableCell>
-                <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Frecuencia Esperada</TableCell>
-                <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">Probabilidad acumulada</TableCell>
+                {/*<TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">fe</TableCell>
+                <TableCell style={{fontWeight:'bold', color:'white'}} align="center" className="table-header">pa</TableCell>*/}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -390,18 +395,18 @@ const Prueba = () => {
                   <TableCell align="center">{dato.hasta.toFixed(2)}</TableCell>
                   <TableCell align="center">{dato.marcaClase.toFixed(2)}</TableCell>
                   <TableCell align="center">{dato.cantidad}</TableCell>
-                  <TableCell align="center">{dato.frecEsperada.toFixed(2)}</TableCell>
-                  <TableCell align="center">{dato.probabilidadAcumulada.toFixed(4)}</TableCell>
+                  {/*<TableCell align="center">{dato.frecEsperada.toFixed(2)}</TableCell>
+                  <TableCell align="center">{dato.probabilidadAcumulada.toFixed(4)}</TableCell>*/}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
 
-        <div className='fila3'>
+        {/*<div className='fila3'>
             <h3>La frecuencia esperada total es: {sumaFrecEsperadas.toFixed(4)}</h3>
             <h3>La probabilidad acumulada total es: {sumaProbabilidades.toFixed(4)}</h3>
-        </div>
+        </div>*/}
       </Grid>
 
     </div>
